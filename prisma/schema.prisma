@@ -1,0 +1,80 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(uuid())
+
+  email String @unique
+  password String
+  username String 
+
+  applications Application[]
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("users")
+}
+
+model AuthorizationCode {
+  code String @id @default(uuid())
+  userId String 
+  redirectUri String 
+  expiresAt DateTime 
+
+  application Application @relation(fields: [applicationId], references: [id])
+  applicationId String 
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("authorization_codes")
+}
+
+
+model Application {
+  id String @id @default(uuid())
+  name String
+  redirectUri String @map("redirect_uri")
+
+  clientId String @unique @default(uuid()) @map("client_id")
+  clientSecret String @map("client_secret")
+
+  accessTokens AccessToken[]
+  authorizationCodes AuthorizationCode[]
+
+  user    User    @relation(fields: [userId], references: [id])
+  userId  String 
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  @@map("applications")
+}
+
+model AccessToken {
+  token String @id @default(uuid())
+  userId String 
+  expiresAt DateTime 
+
+  application Application @relation(fields: [applicationId], references: [id])
+  applicationId String
+
+  refreshToken RefreshToken? 
+  
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("access_tokens")
+}
+
+model RefreshToken {
+  token String @id @default(uuid())
+  expiresAt DateTime
+
+  accessToken AccessToken @relation(fields: [accessTokenId], references: [token])
+  accessTokenId String @unique  
+
+  createdAt DateTime @default(now()) @map("created_at")
+  @@map("refresh_tokens")
+}
