@@ -23,9 +23,7 @@ model User {
 
 model AuthorizationCode {
   code String @id @default(uuid())
-  userId String 
-  redirectUri String 
-  expiresAt DateTime 
+  expiresIn Int 
 
   application Application @relation(fields: [applicationId], references: [id])
   applicationId String 
@@ -45,6 +43,7 @@ model Application {
 
   accessTokens AccessToken[]
   authorizationCodes AuthorizationCode[]
+  accounts Account[]
 
   user    User    @relation(fields: [userId], references: [id])
   userId  String 
@@ -55,9 +54,10 @@ model Application {
 }
 
 model AccessToken {
-  token String @id @default(uuid())
+  id String @id @default(uuid())
+  token String @unique @db.VarChar(500)
   userId String 
-  expiresAt DateTime 
+  expiresIn Int 
 
   application Application @relation(fields: [applicationId], references: [id])
   applicationId String
@@ -69,12 +69,25 @@ model AccessToken {
 }
 
 model RefreshToken {
-  token String @id @default(uuid())
-  expiresAt DateTime
+  id String @id @default(uuid())
+  token String @unique @db.VarChar(500)
+  expiresIn Int
 
-  accessToken AccessToken @relation(fields: [accessTokenId], references: [token])
+  accessToken AccessToken @relation(fields: [accessTokenId], references: [id])
   accessTokenId String @unique  
 
   createdAt DateTime @default(now()) @map("created_at")
   @@map("refresh_tokens")
+}
+
+model Account {
+    id String @id @default(uuid())
+    userId String
+    
+    application Application @relation(fields: [applicationId], references: [id])
+    applicationId String
+
+    accessToken String @map("access_token") @unique @db.VarChar(500)
+    refreshToken String @map("refresh_token") @unique @db.VarChar(500)
+    @@map("accounts")
 }

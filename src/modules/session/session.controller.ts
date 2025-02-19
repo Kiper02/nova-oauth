@@ -4,7 +4,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import type { Request as RequestType } from 'express';
 
-@Controller('auth')
+@Controller('session')
 export class SessionController {
   constructor(private readonly sessionService: SessionService) {}
 
@@ -18,7 +18,7 @@ export class SessionController {
     return await this.sessionService.login(req, dto);
   }
 
-  @Get('sessions')
+  @Get()
   public async findAllSessions(@Request() req: RequestType) {
     return await this.sessionService.findAllSessions(req);
   }
