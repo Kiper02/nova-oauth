@@ -29,6 +29,14 @@ export class SessionController {
     return await this.sessionService.logout(req);
   }
 
+  @Get('profile')
+  @Authorization()
+  public async findProfile(
+    @Authrorized() user: User
+  ) {
+    return await this.sessionService.findProfile(user)
+  }
+
   @Get()
   public async findAllSessions(@Request() req: RequestType) {
     return await this.sessionService.findAllSessions(req);

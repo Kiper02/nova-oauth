@@ -87,13 +87,17 @@ export class SessionService {
 
     }
 
-    public async findUser(req: Request) {
-        const user = await this.prismaService.user.findUnique({
+    public async findProfile(user: User) {
+        const profile = await this.prismaService.user.findUnique({
             where: {
-                id: req.session.id
+                id: user.id
             }
         })
-        return user;
+
+        if(profile && profile.avatar) {
+            profile.avatar = profile.avatar ? `${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/${profile.avatar}` : null;
+        } 
+        return profile;
     }
 
     public async uploadAvatar(user: User, avatar: Express.Multer.File) {
