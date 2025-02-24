@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, InternalServerErrorException, UnauthorizedException } from '@nestjs/common';
 import { PrismaService } from 'src/core/prisma/prisma.service';
 import { RegisterDto } from './dto/register.dto';
 import { hash, verify } from 'argon2';
@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { RedisService } from 'src/core/redis/redis.service';
 import { getSessionMetaData } from 'src/shared/utils/session-metadata.util';
 import { ISessionMetadata } from 'src/shared/types/session-metadata';
+import saveFile from 'src/shared/utils/save-file';
 
 @Injectable()
 export class SessionService {
@@ -62,13 +63,14 @@ export class SessionService {
     }
 
     public async logout(req: Request) {
-        return await this.destroySession(req);
+        await this.redisService.del(req.session.id)
+        await this.destroySession(req);        
+        return true
     }
 
     public async findAllSessions(req: Request) {
         const userId = req.session.userId;
         const keys = await this.redisService.keys("*")
-        
         const userSession = []
         
         for(const key of keys) {
@@ -81,7 +83,7 @@ export class SessionService {
             }
         }
         userSession.sort((a, b) => b.createdAt - a.createdAt);
-        return userSession.filter(session => session.id != req.session.id);
+        return userSession.filter(session => session.id !== req.session.id);
 
     }
 
@@ -92,6 +94,44 @@ export class SessionService {
             }
         })
         return user;
+    }
+
+    public async uploadAvatar(user: User, avatar: Express.Multer.File) {
+        if(!avatar) {
+            throw new BadRequestException('Поле avatar обязательно');
+        }
+
+        const nameAvatar = saveFile(avatar);
+
+
+        await this.prismaService.user.update({
+            where: {
+                id: user.id
+            },
+            data: {
+                avatar: nameAvatar
+            }
+        })
+
+        return true;
+    }
+
+    public async removeSession(req: Request, id: string) {
+        const userId = req.session.userId;
+        const key = await this.redisService.get(id);
+        
+        if(!key) {
+            throw new BadRequestException('Сессия не найдена')
+        }
+        const session = JSON.parse(key)
+        
+        if(session.userId !== userId) {
+            throw new UnauthorizedException('Вы не можете удалить эту сессию')
+        }
+
+        await this.redisService.del(key);
+        await this.destroySession(req);        
+        return true
     }
 
 

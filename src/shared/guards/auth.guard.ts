@@ -10,25 +10,21 @@ import { PrismaService } from 'src/core/prisma/prisma.service';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(private readonly prismaService: PrismaService) {}
-  async canActivate(
-    context: ExecutionContext,
-  ): Promise<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const userId = request.session?.userId;
-    if (!userId) {
+    if (typeof request.session.userId === 'undefined') {
       throw new UnauthorizedException('Пользователь не авторизован');
     }
 
     const user = await this.prismaService.user.findUnique({
       where: {
-        id: userId
-      }
-    })
+        id: request.session.userId,
+      },
+    });
 
-    if(!user) {
-      throw new UnauthorizedException('Пользователь не авторизован')
+    if (!user) {
+      throw new UnauthorizedException('Пользователь не авторизован');
     }
-
     request.user = user;
     return true;
   }

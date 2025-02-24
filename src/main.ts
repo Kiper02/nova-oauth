@@ -23,7 +23,8 @@ async function bootstrap() {
     resave: false,
     saveUninitialized: false,
     cookie: { 
-      secure: IS_DEV ? false : true 
+      secure: IS_DEV ? false : true,
+      httpOnly: IS_DEV ? false : true,
     },
     store: new RedisStore({
       prefix: config.getOrThrow<string>('SESSION_FOLDER'),

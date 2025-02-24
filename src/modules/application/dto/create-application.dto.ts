@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString, IsUrl, Length } from "class-validator";
+import { IsArray, IsNotEmpty, IsString, IsUrl, Length } from "class-validator";
 
 export class CreateApplicationDto {
     @IsNotEmpty()
@@ -8,6 +8,15 @@ export class CreateApplicationDto {
 
     @IsNotEmpty()
     @IsString()
-    @IsUrl()
+    // @IsUrl()
     redirect_uri: string;
+
+    @IsNotEmpty()
+    @IsArray()
+    scopes: string[];
+
+    @IsNotEmpty()
+    @IsString()
+    // @IsUrl()
+    host: string;
 }

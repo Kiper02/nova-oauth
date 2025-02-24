@@ -4,6 +4,8 @@ import { CreateApplicationDto } from './dto/create-application.dto';
 import { Request } from 'express';
 import { v4 } from 'uuid';
 import { User } from '@prisma/client';
+import * as moment from 'moment';
+import 'moment/locale/ru';
 
 @Injectable()
 export class ApplicationService {
@@ -25,6 +27,15 @@ export class ApplicationService {
             }
         })
 
+        for(const scope of dto.scopes) {
+            await this.prismaService.scopes.create({
+                data: {
+                    name: scope,
+                    applicationId: created.id
+                }
+            })
+        }
+
         return created;
     }
 
@@ -40,11 +51,20 @@ export class ApplicationService {
 
     public async findAll(user: User) {
         const applications = await this.prismaService.application.findMany({
-            where: {
-                userId: user.id
-            }
+          where: {
+            userId: user.id
+          }
         })
-
-        return applications;
-    }
+      
+        const result = applications.map((item) => {
+          return {
+            ...item,
+            createdAt: moment(item.createdAt).locale('ru').format('D MMMM YYYY'),
+            updatedAt: moment(item.updatedAt).locale('ru').format('D MMMM YYYY'),
+          };
+        });
+      
+        return result;
+      }
+      
 }
