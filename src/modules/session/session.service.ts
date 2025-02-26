@@ -10,6 +10,9 @@ import { RedisService } from 'src/core/redis/redis.service';
 import { getSessionMetaData } from 'src/shared/utils/session-metadata.util';
 import { ISessionMetadata } from 'src/shared/types/session-metadata';
 import saveFile from 'src/shared/utils/save-file';
+import * as fs from 'fs'
+import * as path from 'path'
+import { UpdateDto } from './dto/update.dto';
 
 @Injectable()
 export class SessionService {
@@ -30,13 +33,22 @@ export class SessionService {
             throw new ConflictException('Пользователь с таким email уже существует')
         }
 
+        const directoryPath = path.join(path.resolve(), 'public', 'avatars');
+        const avatars = fs.readdirSync(directoryPath);
+
+        const randomAvatar = Math.floor(Math.random() * avatars.length) 
+        const avatar = path.join('public', 'avatars', avatars[randomAvatar]);
 
         const user = await this.prismaService.user.create({
             data: {
                 ...dto,
-                password: await hash(dto.password)
+                password: await hash(dto.password),
+                avatar
             }
         })
+        if(user && user.avatar) {
+            user.avatar = `${this.configService.getOrThrow<string>('ALLOWED_ORIGIN')}/${user.avatar}`
+        }
         const metadata = getSessionMetaData(req);
         return await this.saveSession(req, user, metadata);
     }
@@ -136,6 +148,26 @@ export class SessionService {
         await this.redisService.del(key);
         await this.destroySession(req);        
         return true
+    }
+
+    public async update(user: User, dto: UpdateDto) {
+        const isExistUser = await this.prismaService.user.findUnique({
+            where: {
+                id: user.id
+            }
+        })
+
+        await this.prismaService.user.update({
+            where: {
+                id: isExistUser.id,
+            },
+            data: {
+                ...dto,
+                password: dto.password ? await hash(dto.password) : isExistUser.password
+            }
+        })
+
+        return true;
     }
 
 

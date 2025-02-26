@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Post, Request, UploadedFile, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put, Request, UploadedFile, UseGuards, UseInterceptors, UsePipes } from '@nestjs/common';
 import { SessionService } from './session.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -9,6 +9,7 @@ import { Authorization } from 'src/shared/decorators/authorization.decorator';
 import { Authrorized } from 'src/shared/decorators/authrorized.decorator';
 import { User } from '@prisma/client';
 import { RemoveSessionDto } from './dto/remove-session.dto';
+import { UpdateDto } from './dto/update.dto';
 
 @Controller('session')
 export class SessionController {
@@ -59,5 +60,14 @@ export class SessionController {
     @Body() dto: RemoveSessionDto
   ) {
     return await this.sessionService.removeSession(req, dto.id);
+  }
+
+  @Authorization()
+  @Put()
+  public async update(
+    @Authrorized() user: User,
+    @Body() dto: UpdateDto
+  ) {
+    return await this.sessionService.update(user, dto);
   }
 }

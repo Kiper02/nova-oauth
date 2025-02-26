@@ -9,7 +9,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { IS_DEV } from './shared/utils/is-dev.uil';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {cors: {origin: "*"}});
+  const app = await NestFactory.create(AppModule, {cors: {origin: "http://localhost:3000", credentials: true}});
   
   const config = app.get(ConfigService);
   const redis = new Redis(config.getOrThrow<string>('REDIS_URL'));
