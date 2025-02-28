@@ -28,9 +28,9 @@ export class ApplicationService {
         })
 
         for(const scope of dto.scopes) {
-            await this.prismaService.scopes.create({
+            await this.prismaService.applicationScopes.create({
                 data: {
-                    name: scope,
+                    scopeId: scope,
                     applicationId: created.id
                 }
             })
@@ -67,4 +67,9 @@ export class ApplicationService {
         return result;
       }
       
+
+    public async findScopes() {
+        const scopes = await this.prismaService.scopes.findMany();
+        return scopes;
+    }
 }

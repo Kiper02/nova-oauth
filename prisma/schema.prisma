@@ -49,22 +49,27 @@ model Application {
   clientSecret String @map("client_secret")
 
   authorizationCodes AuthorizationCode[]
-  scopes Scopes[]
-
   user    User    @relation(fields: [userId], references: [id])
   userId  String 
 
+  applicationScopes ApplicationScopes[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
   @@map("applications")
 }
 
+model ApplicationScopes {
+  id String @id @default(uuid())
+  application Application @relation(fields: [applicationId], references: [id])
+  applicationId String
+  scope Scopes @relation(fields: [scopeId], references: [id])
+  scopeId String
+}
+
 model Scopes {
   id String @id @default(uuid())
   name String @unique
-
-  application Application @relation(fields: [applicationId], references: [id])
-  applicationId String
+  applicationScopes ApplicationScopes[]
   @@map("scopes")
 }

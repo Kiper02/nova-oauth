@@ -31,4 +31,11 @@ export class ApplicationController {
   ) {
     return await this.applicationService.findAll(user);
   }
+
+  @Authorization()
+  @Get("scope")
+  public async findScopes(
+  ) {
+    return await this.applicationService.findScopes();
+  }
 }
