@@ -6,6 +6,7 @@ import { SessionModule } from 'src/modules/session/session.module';
 import { ApplicationModule } from 'src/modules/application/application.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PublicModule } from 'src/modules/public/public.module';
+import { AuthModule } from 'src/modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { PublicModule } from 'src/modules/public/public.module';
     RedisModule,
     SessionModule,
     ApplicationModule,
+    AuthModule,
     PublicModule,
   ],
 })
