@@ -4,9 +4,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { RedisModule } from './redis/redis.module';
 import { SessionModule } from 'src/modules/session/session.module';
 import { ApplicationModule } from 'src/modules/application/application.module';
-import { AuthModule } from 'src/modules/auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
-import { UserInfoModule } from 'src/modules/user-info/user-info.module';
 import { PublicModule } from 'src/modules/public/public.module';
 
 @Module({
@@ -23,8 +21,6 @@ import { PublicModule } from 'src/modules/public/public.module';
     RedisModule,
     SessionModule,
     ApplicationModule,
-    AuthModule,
-    UserInfoModule,
     PublicModule,
   ],
 })

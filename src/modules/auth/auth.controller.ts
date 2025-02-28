@@ -1,31 +1,24 @@
-import { Body, Controller, Param, Post, Request } from '@nestjs/common';
+import { Body, Controller, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { GetAuthorizationUrlDto } from './dto/get-authorization-url.dto';
-import { AuthorizedDto } from './dto/authorized.dto';
-import type { Request as RequestType } from 'express';
+import { LoginDto } from './dto/login.dto';
+import { CodeDto } from './dto/code.dto';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  @Post("code")
-  public async getAuthorizationCode(
-    @Body() dto: GetAuthorizationUrlDto
+
+  @Post("login")
+  public async login(
+    @Body() dto: LoginDto
   ) {
-    return await this.authService.getAuthorizationCode(dto);
+    return await this.authService.login(dto);
   }
 
-  @Post("")
-  public async authorized(
-    @Body() dto: AuthorizedDto
+  @Post("token")
+  public async exchangeCodeForTokens(
+    @Body() dto: CodeDto
   ) {
-    return await this.authService.authorized(dto);
-  } 
-
-  @Post("refresh")
-  public async refresh(
-    @Request() req: RequestType
-  ) {
-    
+    return await this.authService.exchangeCodeForTokens(dto.code);
   }
 }

@@ -26,11 +26,14 @@ model User {
 }
 
 model AuthorizationCode {
-  code String @id @default(uuid())
+  id String @id @default(uuid())
   expiresIn Int 
+  code String @default(uuid()) @unique
 
-  application Application @relation(fields: [applicationId], references: [id])
-  applicationId String 
+  client Application @relation(fields: [clientId], references: [clientId])
+  clientId String
+
+  userId String @unique
   
   createdAt DateTime @default(now()) @map("created_at")
   @@map("authorization_codes")
@@ -45,9 +48,7 @@ model Application {
   clientId String @unique @default(uuid()) @map("client_id")
   clientSecret String @map("client_secret")
 
-  accessTokens AccessToken[]
   authorizationCodes AuthorizationCode[]
-  accounts Account[]
   scopes Scopes[]
 
   user    User    @relation(fields: [userId], references: [id])
@@ -59,48 +60,9 @@ model Application {
   @@map("applications")
 }
 
-model AccessToken {
-  id String @id @default(uuid())
-  token String @unique @db.VarChar(500)
-  userId String 
-  expiresIn Int 
-
-  application Application @relation(fields: [applicationId], references: [id])
-  applicationId String
-
-  refreshToken RefreshToken? 
-  
-  createdAt DateTime @default(now()) @map("created_at")
-  @@map("access_tokens")
-}
-
-model RefreshToken {
-  id String @id @default(uuid())
-  token String @unique @db.VarChar(500)
-  expiresIn Int
-
-  accessToken AccessToken @relation(fields: [accessTokenId], references: [id])
-  accessTokenId String @unique  
-
-  createdAt DateTime @default(now()) @map("created_at")
-  @@map("refresh_tokens")
-}
-
-model Account {
-    id String @id @default(uuid())
-    userId String
-    
-    application Application @relation(fields: [applicationId], references: [id])
-    applicationId String
-
-    accessToken String @map("access_token") @unique @db.VarChar(500)
-    refreshToken String @map("refresh_token") @unique @db.VarChar(500)
-    @@map("accounts")
-}
-
 model Scopes {
   id String @id @default(uuid())
-  name String
+  name String @unique
 
   application Application @relation(fields: [applicationId], references: [id])
   applicationId String
