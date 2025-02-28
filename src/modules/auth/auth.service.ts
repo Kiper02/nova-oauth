@@ -63,17 +63,28 @@ export class AuthService {
         if (currentTime > codeData.createdAt.getTime() / 1000 + codeData.expiresIn) {
             throw new UnauthorizedException("Срок действия кода истек");
         }
-        const scope = await this.prismaService.scopes.findFirst({
+        const scopesIds = await this.prismaService.applicationScopes.findMany({
             where: {
                 applicationId: codeData.clientId
             }
         })
 
+        const scopes = [];
+
+        for(const scope of scopesIds) {
+            const scopeData = await this.prismaService.scopes.findUnique({
+                where: {
+                    id: scope.scopeId
+                }
+            })
+            scopes.push(scopeData.name);
+        }
+
         const accessTime = 60 * 60 * 1000;
         const refreshTime = 30 * 24 * 60 * 60 * 1000;
 
-        const accessToken = this.jwtService.sign({userId: codeData.userId, scope}, {expiresIn: accessTime});
-        const refreshToken = this.jwtService.sign({userId: codeData.userId, scope}, {expiresIn: refreshTime});
+        const accessToken = this.jwtService.sign({userId: codeData.userId, scopes}, {expiresIn: accessTime});
+        const refreshToken = this.jwtService.sign({userId: codeData.userId, scopes}, {expiresIn: refreshTime});
 
 
         await this.prismaService.authorizationCode.delete({where: {id: codeData.id}});

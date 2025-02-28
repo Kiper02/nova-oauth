@@ -70,6 +70,8 @@ model ApplicationScopes {
 model Scopes {
   id String @id @default(uuid())
   name String @unique
+  description String
+
   applicationScopes ApplicationScopes[]
   @@map("scopes")
 }

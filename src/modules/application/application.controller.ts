@@ -4,6 +4,7 @@ import { CreateApplicationDto } from './dto/create-application.dto';
 import { Authorization } from 'src/shared/decorators/authorization.decorator';
 import { Authrorized } from 'src/shared/decorators/authrorized.decorator';
 import type { User } from '@prisma/client';
+import { CreateScopeDto } from './dto/create-scope.dto';
 
 @Controller('application')
 export class ApplicationController {
@@ -17,6 +18,15 @@ export class ApplicationController {
   ) {
     return await this.applicationService.create(user, dto)
   }
+
+
+  @Authorization()
+  @Get("scope")
+  public async findScopes(
+  ) {
+    return await this.applicationService.findScopes();
+  }
+
 
   @Authorization()
   @Get(":id")
@@ -33,9 +43,10 @@ export class ApplicationController {
   }
 
   @Authorization()
-  @Get("scope")
-  public async findScopes(
+  @Post("scope")
+  public async createScope(
+    @Body() dto: CreateScopeDto
   ) {
-    return await this.applicationService.findScopes();
+    return await this.applicationService.createScope(dto);
   }
 }
