@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Request, Response } from '@nestjs/common';
+import { Body, Controller, Get, Post, Request, Response } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { CodeDto } from './dto/code.dto';
@@ -23,5 +23,10 @@ export class AuthController {
     @Body() dto: CodeDto
   ) {
     return await this.authService.exchangeCodeForTokens(dto.code);
+  }
+
+  @Get()
+  public async getUser(@Request() req: RequestType) {
+    return await this.authService.findUser(req);
   }
 }
